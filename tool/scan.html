@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AITL Scan v0.1 — Automated Pattern Detection</title>
+<meta name="description" content="Automated detection of generative accessibility failure patterns in AI-generated UI markup. Part of the Accessibility-in-the-Loop (AITL) framework.">
+<style>
+  :root{--ink:#16202E;--paper:#FAFBFC;--card:#fff;--line:#D7DDE5;--navy:#1F3864;--navy-deep:#14243A;
+    --teal:#0E6E60;--teal-dark:#0A5448;--crit:#B91C1C;--high:#C2410C;--med:#8A6100;--muted:#5B6673;
+    --pass:#166534;--fail:#B91C1C;--review:#7C4A00}
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper)}
+  a{color:var(--teal)}
+  :focus-visible{outline:3px solid var(--teal);outline-offset:2px;border-radius:2px}
+  header{background:var(--navy-deep);color:#fff;padding:26px 20px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 4px}
+  header h1{margin:0;font-size:1.5rem}
+  header .sub{color:#C9D4E4;font-size:.93rem;margin-top:6px;max-width:64ch}
+  main{max-width:1080px;margin:0 auto;padding:24px 20px 80px}
+  h2{font-size:1.12rem;margin:0 0 12px;color:var(--navy)}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:24px}
+  label{display:block;font-weight:600;font-size:.9rem;margin:0 0 6px}
+  textarea{width:100%;min-height:220px;font:13px/1.5 ui-monospace,Consolas,monospace;padding:12px;border:1px solid #9AA6B4;border-radius:8px;background:#fff;color:var(--ink);resize:vertical}
+  button{font:inherit;font-weight:600;border-radius:8px;border:1px solid transparent;padding:10px 18px;cursor:pointer}
+  .btn-primary{background:var(--teal);color:#fff}.btn-primary:hover{background:var(--teal-dark)}
+  .btn-quiet{background:#fff;color:var(--navy);border-color:#9AA6B4}.btn-quiet:hover{background:#EEF2F7}
+  .btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  #gate{border-radius:10px;padding:15px 20px;margin:0 0 22px;display:none;align-items:center;gap:14px;border:2px solid}
+  #gate.pass{display:flex;background:#F0FDF4;border-color:var(--pass);color:var(--pass)}
+  #gate.fail{display:flex;background:#FEF2F2;border-color:var(--fail);color:var(--fail)}
+  #gate .dot{width:13px;height:13px;border-radius:50%;background:currentColor;flex:none}
+  #gate span{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:.88rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--navy);color:#fff;font-weight:600}
+  .sev{font-weight:700}.sev.Critical{color:var(--crit)}.sev.High{color:var(--high)}.sev.Medium{color:var(--med)}
+  code{background:#F1F3F6;border:1px solid var(--line);border-radius:4px;padding:1px 5px;font-size:.82em;word-break:break-all}
+  .routed{background:#FFF8EB;border:1px solid #E7C892;border-radius:8px;padding:14px 18px}
+  .routed h3{margin:0 0 8px;font-size:.95rem;color:var(--review)}
+  .routed li{margin-bottom:6px;font-size:.9rem}
+  .scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:6px}
+  .sc{border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:.85rem}
+  .sc b{display:block;font-size:1.2rem;color:var(--navy)}
+  .note{color:var(--muted);font-size:.85rem}
+  #report{white-space:pre-wrap;background:#F4F6F9;border:1px solid var(--line);border-radius:8px;padding:16px;font-family:ui-monospace,Consolas,monospace;font-size:.8rem;max-height:380px;overflow:auto}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  footer{border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;padding:18px 20px;max-width:1080px;margin:0 auto}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>AITL Scan <span aria-hidden="true">·</span> v0.1</h1>
+    <p class="sub"><strong>Automated detection layer of Accessibility-in-the-Loop (AITL), applying the AIAAF framework.</strong> Paste AI-generated markup; the engine detects the generative failure-pattern taxonomy (P1–P8) and structural defects automatically, fires the release gate, and routes what needs human judgment. Export the result into the AITL Evaluator to complete the human layer.</p>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Input — AI-generated markup</h2>
+    <label for="src">Manual mode — paste the generated HTML (include its CSS in &lt;style&gt; for style checks)</label>
+    <textarea id="src" spellcheck="false" placeholder="<div class=&quot;card&quot;> ... </div>"></textarea>
+    <label for="url" style="margin-top:12px">Or a prototype / deployed-preview link</label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <input type="url" id="url" placeholder="https://your-prototype.example.com" style="flex:1;min-width:260px;padding:9px 10px;border:1px solid #9AA6B4;border-radius:6px;font:inherit">
+      <button class="btn-quiet" id="btnFetch">Fetch &amp; scan link</button>
+    </div>
+    <p class="note" id="fetchNote" role="status" aria-live="polite" style="margin:8px 0 0">Note: browsers block cross-site fetches (CORS) for many URLs — if the fetch fails, paste the markup above, or use automatic mode: connect AITL as an MCP server to Claude/your AI tool (see the repository's mcp-server guide), where URL scanning runs without browser limits.</p>
+    <div class="btnrow">
+      <button class="btn-primary" id="btnScan">Run automated scan</button>
+      <button class="btn-quiet" id="btnSample">Load sample (Pulse homepage)</button>
+    </div>
+  </section>
+
+  <div id="gate" class="pass" role="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    <div><strong id="gateTitle"></strong><br><span id="gateDetail"></span></div>
+  </div>
+
+  <section class="card" id="resultsCard" hidden>
+    <h2>Automated findings</h2>
+    <table id="resTable">
+      <thead><tr><th>#</th><th>Element</th><th>Pattern</th><th>WCAG</th><th>Severity</th><th>Detection rationale</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="note" id="cleanNote" hidden>No automatically detectable defects found — proceed to the human evaluation layer.</p>
+
+    <div style="margin-top:18px" class="routed" id="routedBox">
+      <h3>Routed to human / AT-user review (not automatable)</h3>
+      <ul id="routedList"></ul>
+    </div>
+
+    <h2 style="margin-top:22px">Suggested dimension scores <span class="note">(starting point — the human evaluator confirms)</span></h2>
+    <div class="scores" id="scores"></div>
+
+    <div class="btnrow">
+      <button class="btn-quiet" id="btnReport">Generate report</button>
+      <button class="btn-quiet" id="btnJson">Export JSON for AITL Evaluator</button>
+    </div>
+    <pre id="report" hidden tabindex="0" aria-label="Generated scan report"></pre>
+  </section>
+</main>
+
+<footer>AITL Scan v0.1 · Automated layer of the Accessibility-in-the-Loop framework · © 2026 Ifeoluwa Orimolade · CC BY 4.0. Automated detection covers the machine-detectable layer only; contextual judgments are routed to humans by design.</footer>
+
+<script>
+(function(){
+"use strict";
+const PATTERNS={P1:"Placeholder-only labeling",P2:"divAsButton",P3:"Generic/hallucinated alt text",
+  P4:"Visual-only structure",P5:"Color-only state",P6:"Suppressed focus",
+  P7:"Low-contrast default aesthetics",P8:"Decorative ARIA misuse"};
+const GENERIC_ALT=["image","img","photo","picture","icon","illustration","graphic","logo image","banner"];
+let findings=[], routed=[], scores={};
+
+const $=id=>document.getElementById(id);
+const snip=el=>{
+  const c=el.cloneNode(false); const s=c.outerHTML||String(el);
+  return s.length>90?s.slice(0,87)+"\u2026":s;
+};
+function add(el,pattern,wcag,sev,dim,rationale,fix){
+  findings.push({element:typeof el==="string"?el:snip(el),pattern,wcag,sev,dim,rationale,fix});
+}
+
+// ---- contrast helpers (vs white default; flagged as review) ----
+function parseColor(v){
+  v=v.trim().toLowerCase();
+  let m=v.match(/^#([0-9a-f]{3})$/); if(m){const h=m[1];return [0,1,2].map(i=>parseInt(h[i]+h[i],16));}
+  m=v.match(/^#([0-9a-f]{6})$/); if(m){const h=m[1];return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16));}
+  m=v.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/); if(m)return [+m[1],+m[2],+m[3]];
+  return null;
+}
+function lum(c){const f=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);};
+  return 0.2126*f(c[0])+0.7152*f(c[1])+0.0722*f(c[2]);}
+function ratioVsWhite(c){const L=lum(c);return (1.05)/(L+0.05);}
+
+// ---- the scan engine ----
+function scan(html){
+  findings=[]; routed=[]; scores={};
+  const doc=new DOMParser().parseFromString(html,"text/html");
+  const css=[...doc.querySelectorAll("style")].map(s=>s.textContent).join("\n");
+  const isFrag=!/<html[\s>]/i.test(html);
+
+  // P1 — placeholder-only inputs
+  doc.querySelectorAll("input[placeholder],textarea[placeholder]").forEach(el=>{
+    const id=el.id;
+    const hasLabel=(id&&doc.querySelector('label[for="'+CSS.escape(id)+'"]'))||el.closest("label")||
+      el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")||el.getAttribute("title");
+    if(!hasLabel) add(el,"P1","1.3.1, 3.3.2","Critical","D3",
+      "Input identified only by placeholder text, which is not a programmatic label and disappears on entry \u2014 unnamed for screen-reader users.",
+      "Add a persistent associated <label> or aria-label.");
+  });
+
+  // P2 — non-semantic click handlers
+  doc.querySelectorAll("[onclick]").forEach(el=>{
+    const tag=el.tagName.toLowerCase();
+    if(["a","button","input","select","textarea","summary","label"].includes(tag))return;
+    const role=el.getAttribute("role"), ti=el.hasAttribute("tabindex");
+    if(!(role==="button"&&ti))
+      add(el,"P2","2.1.1, 4.1.2","Critical","D2",
+        "Click handler on a non-semantic <"+tag+"> \u2014 not focusable, not keyboard-activatable, exposes no role.",
+        "Use a native <button>, or add role=\"button\", tabindex=\"0\", and key handling.");
+  });
+
+  // P3 — missing/generic alt
+  doc.querySelectorAll("img").forEach(el=>{
+    if(!el.hasAttribute("alt")){
+      add(el,"P3","1.1.1","High","D1","Image has no alt attribute at all \u2014 screen readers may announce the filename.","Add alt=\"\" if decorative, or a purposeful description.");
+    }else{
+      const a=el.getAttribute("alt").trim().toLowerCase();
+      if(a&&GENERIC_ALT.includes(a))
+        add(el,"P3","1.1.1","Medium","D1",
+          "Generic alt text (\""+a+"\") \u2014 a value produced because the attribute exists, conveying nothing.",
+          "alt=\"\" if decorative; a purpose-driven description if informative.");
+      else if(a) routed.push("Verify alt text is meaningful in context for "+snip(el)+" (\u201C"+el.getAttribute("alt")+"\u201D).");
+    }
+  });
+
+  // P4 — heading structure
+  const heads=doc.querySelectorAll("h1,h2,h3,h4,h5,h6");
+  if(doc.body&&doc.body.textContent.trim().length>120){
+    if(heads.length===0)
+      add("(document)","P4","1.3.1, 2.4.6","High","D1",
+        "No heading elements exist anywhere \u2014 titles are styled containers only; screen-reader heading navigation returns an empty list.",
+        "Real <h1>\u2013<h3> hierarchy for the title and sections.");
+    else if(!doc.querySelector("h1"))
+      add("(document)","P4","1.3.1, 2.4.6","Medium","D1",
+        "Headings exist but no <h1> \u2014 the page lacks a programmatic title.","Promote the main title to <h1>.");
+  }
+
+  // P6 — suppressed focus
+  if(/outline\s*:\s*(none|0)/i.test(css) && !/:focus-visible/i.test(css))
+    add("(stylesheet)","P6","2.4.7","High","D2",
+      "CSS removes focus outlines (outline:none/0) with no :focus-visible replacement \u2014 keyboard users cannot see where they are.",
+      "Remove the reset or add a visible :focus-visible style.");
+
+  // P8 — aria-hidden over focusable
+  doc.querySelectorAll('[aria-hidden="true"]').forEach(el=>{
+    const f=el.querySelector('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
+    if(f) add(el,"P8","4.1.2","High","D4",
+      "aria-hidden=\"true\" container holds focusable descendants \u2014 keyboard focus lands on elements that announce nothing.",
+      "Remove aria-hidden from the container; hide only decorative children.");
+  });
+
+  // P7 — low-contrast colors in CSS (vs white; heuristic)
+  const seen=new Set();
+  (css.match(/color\s*:\s*([^;{}]+)/gi)||[]).forEach(decl=>{
+    const v=decl.split(":")[1]; const c=parseColor(v||"");
+    if(!c)return; const key=c.join(","); if(seen.has(key))return; seen.add(key);
+    const r=ratioVsWhite(c);
+    if(r<4.5&&r>1.2)
+      add("(stylesheet) color "+v.trim(),"P7","1.4.3","High","D1",
+        "Text color computes to "+r.toFixed(1)+":1 against a white background \u2014 below the 4.5:1 minimum for normal text. (Verify against the actual rendered background.)",
+        "Darken to \u22654.5:1, e.g. #4B5563 or darker on white.");
+  });
+
+  // P5 — color-only state heuristic → routed unless aria-current present
+  doc.querySelectorAll('a.active,a.selected,a.current,[class*="active"] a').forEach(el=>{
+    if(el.tagName==="A"&&!el.getAttribute("aria-current"))
+      add(el,"P5","1.4.1","Medium","D1",
+        "Element styled as the active/current item without aria-current \u2014 if the distinction is color-only, non-color users receive no cue.",
+        "Add aria-current=\"page\" and a non-color cue (underline/weight).");
+  });
+
+  // structural extras (non-taxonomy)
+  if(!isFrag && !doc.documentElement.getAttribute("lang"))
+    add("(document)","","3.1.1","Medium","D3","No lang attribute on <html> \u2014 screen readers cannot select the correct speech engine.","Add lang=\"en\" (or the correct language).");
+  if(doc.body&&doc.body.textContent.trim().length>120){
+    if(!doc.querySelector("main"))
+      add("(document)","","1.3.1","Medium","D4","No <main> landmark \u2014 landmark navigation unavailable.","Wrap primary content in <main>.");
+    if(!doc.querySelector("nav")){
+      const navish=[...doc.querySelectorAll('div,ul')].find(el=>/nav|menu|links/i.test(el.className)&&el.querySelectorAll("a").length>=3);
+      if(navish) add(navish,"","1.3.1","Medium","D4","Link group appears to be primary navigation but is not a <nav> landmark.","Use a semantic <nav> element.");
+    }
+  }
+
+  // always-routed judgments (the non-automatable layer, by design)
+  routed.push("Screen-reader pass (D5): are elements announced sensibly and is the task completable?");
+  routed.push("Keyboard pass (D5): reachability, visible focus in practice, logical order.");
+  routed.push("Reading order and label comprehension in context (D3).");
+  routed.push("Touch/click target sizes \u2265 24\u00D724 px measured as rendered (2.5.8).");
+  routed.push("Contrast verified against actual rendered backgrounds and images (1.4.3/1.4.11).");
+
+  // suggested scores
+  const weight={Critical:3,High:2,Medium:1};
+  const dims={D1:5,D2:5,D3:5,D4:5};
+  findings.forEach(f=>{ if(dims[f.dim]!=null) dims[f.dim]=Math.max(1,dims[f.dim]-weight[f.sev]); });
+  const pats=new Set(findings.filter(f=>f.pattern).map(f=>f.pattern));
+  scores={...dims, D5:null, D6: pats.size===0?5:Math.max(1,5-pats.size)};
+  render();
+}
+
+// ---- render ----
+function render(){
+  const tb=document.querySelector("#resTable tbody"); tb.innerHTML="";
+  findings.forEach((f,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML="<td>"+(i+1)+"</td><td><code>"+esc(f.element)+"</code></td><td>"+
+      (f.pattern?f.pattern+" "+PATTERNS[f.pattern]:"\u2014")+"</td><td>"+f.wcag+
+      '</td><td class="sev '+f.sev+'">'+f.sev+"</td><td>"+esc(f.rationale)+"<br><em>Fix:</em> "+esc(f.fix)+"</td>";
+    tb.appendChild(tr);
+  });
+  $("resTable").hidden=findings.length===0;
+  $("cleanNote").hidden=findings.length!==0;
+  const rl=$("routedList"); rl.innerHTML="";
+  routed.forEach(r=>{const li=document.createElement("li");li.textContent=r;rl.appendChild(li);});
+  const sc=$("scores"); sc.innerHTML="";
+  [["D1","Perceivable"],["D2","Operable"],["D3","Understandable"],["D4","Robust"],["D5","AT behavior"],["D6","Pattern resistance"]].forEach(([d,n])=>{
+    const v=scores[d];
+    const div=document.createElement("div");div.className="sc";
+    div.innerHTML=d+" "+n+"<b>"+(v==null?"human":v+"/5")+"</b>";
+    sc.appendChild(div);
+  });
+  const crits=findings.filter(f=>f.sev==="Critical").length;
+  const g=$("gate");
+  g.className=crits?"fail":"pass";
+  $("gateTitle").textContent="Release gate: "+(crits?"FAILING":"PASSING (automated layer)");
+  $("gateDetail").textContent=crits
+    ? crits+" Critical finding"+(crits>1?"s":"")+" detected automatically \u2014 blocks release before human review even begins."
+    : findings.length+" automated finding(s), none Critical. Human evaluation layer (D5 + routed items) still required before a full pass.";
+  $("resultsCard").hidden=false;
+}
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+// ---- outputs ----
+$("btnReport").addEventListener("click",()=>{
+  const crits=findings.filter(f=>f.sev==="Critical").length;
+  let r="# AITL Scan Report (automated layer)\n\n- Date: "+new Date().toISOString().slice(0,10)+
+    "\n- Engine: AITL Scan v0.1\n- Gate: "+(crits?"FAIL ("+crits+" Critical)":"PASS at automated layer")+
+    "\n\n## Automated findings ("+findings.length+")\n";
+  findings.forEach((f,i)=>{r+="\n"+(i+1)+". ["+f.sev+"] "+f.element+(f.pattern?" \u2014 "+f.pattern+" "+PATTERNS[f.pattern]:"")+
+    " \u00B7 WCAG "+f.wcag+"\n   "+f.rationale+"\n   Fix: "+f.fix+"\n";});
+  r+="\n## Routed to human / AT-user review\n"; routed.forEach(x=>r+="- "+x+"\n");
+  r+="\n## Suggested scores\n";
+  Object.entries(scores).forEach(([d,v])=>r+="- "+d+": "+(v==null?"requires human evaluation":v+"/5 (suggested)")+"\n");
+  r+="\n---\nAITL Scan automates the machine-detectable layer of the AITL methodology.\nContextual judgments are routed to human and assistive-technology-user review by design.\n";
+  $("report").textContent=r; $("report").hidden=false; $("report").focus();
+});
+$("btnJson").addEventListener("click",()=>{
+  const data={fields:{artifact:"(scanned artifact)",source:"AITL Scan v0.1 automated pass",
+    task:"",evaluator:"",target:"WCAG 2.2 AA"},at:["Screen reader","Keyboard-only"],
+    findings:findings.map(f=>({element:f.element,dim:f.dim,wcag:f.wcag,sev:f.sev,pattern:f.pattern,rationale:f.rationale,fix:f.fix})),
+    scores:Object.fromEntries(Object.entries(scores).map(([k,v])=>[k,v==null?"":String(v)]))};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="aitl-scan.json";a.click();URL.revokeObjectURL(a.href);
+});
+$("btnScan").addEventListener("click",()=>{const v=$("src").value.trim();
+  if(!v){$("src").focus();return;} scan(v);});
+$("btnFetch").addEventListener("click",async()=>{
+  const u=$("url").value.trim(); if(!u){$("url").focus();return;}
+  $("fetchNote").textContent="Fetching \u2026";
+  try{
+    const res=await fetch(u,{mode:"cors"});
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const html=await res.text(); $("src").value=html; scan(html);
+    $("fetchNote").textContent="Fetched and scanned: "+u;
+  }catch(e){
+    $("fetchNote").textContent="Could not fetch that URL from the browser (likely CORS). Paste the markup above, or use automatic mode via the MCP server, which fetches URLs without browser limits.";
+  }
+});
+
+// sample: the Pulse homepage (abridged to its relevant structure)
+$("btnSample").addEventListener("click",()=>{
+$("src").value=
+'<!DOCTYPE html>\n<html>\n<head><style>\n*:focus{outline:none}\n.hero-sub,.card p,.foot-note{color:#9CA3AF}\n.links a{color:#6B7280}.links a.active{color:#7C3AED}\n</style></head>\n<body>\n<div class="nav">\n  <div class="logo">Pulse</div>\n  <div class="links">\n    <a href="#" class="active">Home</a><a href="#">Workouts</a><a href="#">Coaches</a><a href="#">Pricing</a>\n  </div>\n  <div class="hamburger" onclick="toggleMenu()">\u2630</div>\n</div>\n<div class="hero">\n  <div class="hero-title">Train smarter. Feel stronger.</div>\n  <p class="hero-sub">Personalized workout plans that adapt to your progress, schedule, and goals.</p>\n  <button class="cta" onclick="signup()">Start free trial</button>\n  <img src="hero.png" alt="image">\n</div>\n<div class="newsletter">\n  <div class="nl-title">Get weekly training tips</div>\n  <input type="email" placeholder="Enter your email">\n  <button class="cta" onclick="subscribe()">Subscribe</button>\n</div>\n<footer>\n  <span class="foot-note">\u00A9 2026 Pulse Fitness Inc.</span>\n  <div class="socials" aria-hidden="true">\n    <a href="https://instagram.com/pulse">IG</a><a href="https://x.com/pulse">X</a>\n  </div>\n</footer>\n</body>\n</html>';
+});
+})();
+</script>
+</body>
+</html>

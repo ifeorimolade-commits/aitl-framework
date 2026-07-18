@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- SYNTHETIC ARTIFACT for AITL evaluation. Represents typical AI-design-tool
+     output for the prompt: "Generate a modern homepage for a fitness app
+     called Pulse." Created solely for demonstration; contains deliberate,
+     characteristic generative defects. Do not use in production. -->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulse — Train Smarter</title>
+<style>
+  *{margin:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+  *:focus{outline:none}                          /* focus suppressed */
+  body{color:#111827;background:#fff}
+  .nav{display:flex;justify-content:space-between;align-items:center;padding:18px 40px;border-bottom:1px solid #E5E7EB}
+  .logo{font-size:22px;font-weight:800;color:#7C3AED}
+  .links{display:flex;gap:28px}
+  .links a{text-decoration:none;color:#6B7280;font-size:15px}
+  .links a.active{color:#7C3AED}                 /* current page = color only */
+  .hamburger{display:none;cursor:pointer;font-size:24px}
+  .hero{display:flex;align-items:center;gap:48px;padding:70px 40px;max-width:1100px;margin:0 auto}
+  .hero-text{flex:1}
+  .hero-title{font-size:44px;font-weight:800;line-height:1.15}
+  .hero-sub{color:#9CA3AF;font-size:17px;margin:16px 0 28px}   /* low contrast */
+  .cta{background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:14px 28px;font-size:16px;font-weight:600;cursor:pointer}
+  .hero img{flex:1;max-width:460px;border-radius:14px}
+  .features{display:flex;gap:24px;padding:40px;max-width:1100px;margin:0 auto}
+  .card{flex:1;border:1px solid #E5E7EB;border-radius:12px;padding:26px}
+  .card .card-title{font-size:19px;font-weight:700;margin-bottom:8px}   /* looks like heading, isn't */
+  .card p{color:#9CA3AF;font-size:14.5px}                               /* low contrast */
+  .newsletter{background:#F5F3FF;padding:48px 40px;text-align:center;margin-top:40px}
+  .newsletter .nl-title{font-size:26px;font-weight:800;margin-bottom:18px}
+  .nl-row{display:inline-flex;gap:10px}
+  .nl-row input{padding:12px 14px;border:1px solid #D1D5DB;border-radius:8px;width:280px;font-size:15px}
+  footer{display:flex;justify-content:space-between;align-items:center;padding:26px 40px;border-top:1px solid #E5E7EB;margin-top:40px}
+  .foot-note{color:#9CA3AF;font-size:13px}
+  .socials{display:flex;gap:14px}
+  .socials a{display:inline-block;width:18px;height:18px;color:#6B7280}   /* tiny targets */
+  .socials svg{width:18px;height:18px;fill:currentColor}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="logo">Pulse</div>                                <!-- site name: not a heading -->
+  <div class="links">
+    <a href="#" class="active">Home</a>
+    <a href="#">Workouts</a>
+    <a href="#">Coaches</a>
+    <a href="#">Pricing</a>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()">☰</div>         <!-- div-as-button -->
+</div>
+
+<div class="hero">
+  <div class="hero-text">
+    <div class="hero-title">Train smarter.<br>Feel stronger.</div>  <!-- visual-only heading -->
+    <p class="hero-sub">Personalized workout plans that adapt to your progress, schedule, and goals.</p>
+    <button class="cta" onclick="signup()">Start free trial</button> <!-- native button: correct -->
+  </div>
+  <img src="hero.png" alt="image">                              <!-- hallucinated alt -->
+</div>
+
+<div class="features">
+  <div class="card">
+    <div class="card-title">Adaptive plans</div>
+    <p>Workouts recalibrate weekly based on your completed sessions.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Live coaching</div>
+    <p>Book one-on-one video sessions with certified trainers.</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Progress insights</div>
+    <p>Track strength, endurance, and recovery in one dashboard.</p>
+  </div>
+</div>
+
+<div class="newsletter">
+  <div class="nl-title">Get weekly training tips</div>
+  <div class="nl-row">
+    <input type="email" placeholder="Enter your email">          <!-- placeholder-only label -->
+    <button class="cta" onclick="subscribe()">Subscribe</button>
+  </div>
+</div>
+
+<footer>
+  <span class="foot-note">© 2026 Pulse Fitness Inc.</span>
+  <div class="socials" aria-hidden="true">                       <!-- aria-hidden w/ focusable links -->
+    <a href="https://instagram.com/pulse"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg></a>
+    <a href="https://x.com/pulse"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"/></svg></a>
+    <a href="https://youtube.com/pulse"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/></svg></a>
+  </div>
+</footer>
+
+<script>
+function toggleMenu(){document.querySelector('.links').classList.toggle('open')}
+function signup(){location.href='#signup'}
+function subscribe(){alert('Subscribed!')}
+</script>
+</body>
+</html>

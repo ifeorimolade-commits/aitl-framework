@@ -1,0 +1,23 @@
+{
+  "fields": {
+    "artifact": "\"Pulse\" fitness app homepage (synthetic AI-design-tool output)",
+    "source": "Simulated AI design tool - prompt: \"Generate a modern homepage for a fitness app called Pulse\"",
+    "task": "A new visitor understands what the app offers, opens the navigation menu, and subscribes to the newsletter",
+    "evaluator": "",
+    "target": "WCAG 2.2 AA"
+  },
+  "at": ["Screen reader", "Keyboard-only"],
+  "findings": [
+    {"element":"Hamburger menu control","dim":"D2","wcag":"2.1.1, 4.1.2","sev":"Critical","pattern":"P2","rationale":"Mobile menu toggle is a div with onclick - no role, no tabindex, no keyboard activation. Keyboard-only users cannot open the navigation; screen readers announce nothing actionable.","fix":"Native <button aria-expanded> controlling the menu, with aria-label=\"Menu\"."},
+    {"element":"Newsletter email field","dim":"D3","wcag":"1.3.1, 3.3.2","sev":"Critical","pattern":"P1","rationale":"Only identification is placeholder text, which vanishes on input and is not a programmatic label - the field is unnamed for screen-reader users, blocking the subscribe step.","fix":"Persistent associated <label> or aria-label=\"Email address\"."},
+    {"element":"All interactive elements (global CSS)","dim":"D2","wcag":"2.4.7","sev":"High","pattern":"P6","rationale":"Global *:focus{outline:none} removes the focus indicator sitewide with no replacement - keyboard users cannot see where they are.","fix":"Remove the reset; provide a visible :focus-visible style."},
+    {"element":"Footer social links","dim":"D4","wcag":"4.1.2","sev":"High","pattern":"P8","rationale":"Container has aria-hidden=\"true\" while its three links remain focusable - focus lands on elements that announce nothing.","fix":"Remove aria-hidden from the container; give each link an accessible name; hide only the decorative SVGs."},
+    {"element":"Hero subtext and card body text","dim":"D1","wcag":"1.4.3","sev":"High","pattern":"P7","rationale":"Body copy is #9CA3AF on white, ~2.5:1 vs the 4.5:1 minimum. The product description central to the task is unreadable for many low-vision users.","fix":"Darken to >=4.5:1 (e.g., #4B5563 or darker)."},
+    {"element":"Page heading structure","dim":"D1","wcag":"1.3.1, 2.4.6","sev":"High","pattern":"P4","rationale":"No heading elements exist: hero title, card titles, and newsletter title are styled divs and there is no h1. Screen-reader heading navigation returns an empty list.","fix":"h1 for the hero title; h2/h3 for sections and cards in logical order."},
+    {"element":"Navigation container","dim":"D4","wcag":"1.3.1","sev":"Medium","pattern":"","rationale":"Primary navigation is a generic div; no <nav> or <main> landmarks, so landmark navigation is unavailable.","fix":"Semantic <nav> and <main> regions."},
+    {"element":"Hero image","dim":"D1","wcag":"1.1.1","sev":"Medium","pattern":"P3","rationale":"alt=\"image\" conveys nothing - noise if decorative, failure if informative.","fix":"alt=\"\" if decorative; purposeful description if informative."},
+    {"element":"Current-page nav indicator","dim":"D1","wcag":"1.4.1","sev":"Medium","pattern":"P5","rationale":"Active nav item distinguished by color alone (violet vs gray).","fix":"Add a non-color cue (underline/weight) and aria-current=\"page\"."},
+    {"element":"Social link targets","dim":"D2","wcag":"2.5.8","sev":"Medium","pattern":"","rationale":"18x18 px targets fall below the 24x24 CSS px minimum.","fix":"Enlarge interactive area to >=24x24 (44x44 recommended for touch)."}
+  ],
+  "scores": {"D1":"2","D2":"2","D3":"2","D4":"1","D5":"2","D6":"1"}
+}

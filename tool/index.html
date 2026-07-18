@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AITL Evaluator v0.1 — Accessibility-in-the-Loop</title>
+<meta name="description" content="Reference implementation of the AITL methodology: evaluate the accessibility of AI-generated user interfaces.">
+<style>
+  :root{
+    --ink:#16202E; --paper:#FAFBFC; --card:#FFFFFF; --line:#D7DDE5;
+    --navy:#1F3864; --navy-deep:#14243A; --teal:#0E6E60; --teal-dark:#0A5448;
+    --crit:#B91C1C; --high:#C2410C; --med:#8A6100; --low:#4B5563;
+    --pass:#166534; --fail:#B91C1C; --muted:#5B6673;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.55 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--paper)}
+  a{color:var(--teal)}
+  :focus-visible{outline:3px solid var(--teal);outline-offset:2px;border-radius:2px}
+  header{background:var(--navy-deep);color:#fff;padding:28px 20px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 4px}
+  header h1{margin:0;font-size:1.55rem;letter-spacing:.2px}
+  header .sub{color:#C9D4E4;font-size:.95rem;margin-top:6px}
+  header .sub a{color:#9FD8CD}
+  main{max-width:1080px;margin:0 auto;padding:24px 20px 80px}
+  h2{font-size:1.15rem;margin:0 0 14px;color:var(--navy)}
+  section.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;margin-bottom:26px}
+  fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 14px;padding:12px 14px}
+  legend{font-weight:600;font-size:.92rem;padding:0 6px}
+  label{display:block;font-weight:600;font-size:.9rem;margin:10px 0 4px}
+  .hintline{font-weight:400;color:var(--muted);font-size:.85rem}
+  input[type=text],textarea,select{width:100%;padding:9px 10px;border:1px solid #9AA6B4;border-radius:6px;font:inherit;background:#fff;color:var(--ink)}
+  textarea{min-height:70px;resize:vertical}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 22px}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr}}
+  .checks{display:flex;flex-wrap:wrap;gap:8px 20px;padding:6px 0}
+  .checks label{display:flex;align-items:center;gap:8px;font-weight:400;margin:0}
+  .checks input{width:18px;height:18px}
+  button{font:inherit;font-weight:600;border-radius:8px;border:1px solid transparent;padding:10px 18px;cursor:pointer}
+  .btn-primary{background:var(--teal);color:#fff}
+  .btn-primary:hover{background:var(--teal-dark)}
+  .btn-quiet{background:#fff;color:var(--navy);border-color:#9AA6B4}
+  .btn-quiet:hover{background:#EEF2F7}
+  .btn-danger{background:#fff;color:var(--crit);border-color:var(--crit);padding:4px 10px;font-size:.85rem}
+  .btn-danger:hover{background:#FEF2F2}
+  .btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+
+  /* Gate banner — the signature element */
+  #gate{border-radius:10px;padding:16px 20px;margin-bottom:26px;display:flex;align-items:center;gap:14px;border:2px solid}
+  #gate.pass{background:#F0FDF4;border-color:var(--pass);color:var(--pass)}
+  #gate.fail{background:#FEF2F2;border-color:var(--fail);color:var(--fail)}
+  #gate .dot{width:14px;height:14px;border-radius:50%;background:currentColor;flex:none}
+  #gate strong{font-size:1.05rem}
+  #gate span{color:var(--ink)}
+
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--navy);color:#fff;font-weight:600}
+  caption{text-align:left;font-weight:600;margin-bottom:8px;color:var(--navy)}
+  .sev{font-weight:700}
+  .sev.Critical{color:var(--crit)} .sev.High{color:var(--high)}
+  .sev.Medium{color:var(--med)} .sev.Low{color:var(--low)}
+  .empty{color:var(--muted);font-style:italic;padding:14px 4px}
+
+  /* dimension score meters */
+  .dims{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+  .dim{border:1px solid var(--line);border-radius:8px;padding:12px}
+  .dim label{margin-top:0;font-size:.85rem}
+  .meter{height:8px;border-radius:4px;background:#E5EAF0;margin-top:8px;overflow:hidden}
+  .meter div{height:100%;background:var(--teal);width:0;transition:width .25s}
+  .scoreval{font-size:.8rem;color:var(--muted);margin-top:4px}
+
+  #report{white-space:pre-wrap;background:#F4F6F9;border:1px solid var(--line);border-radius:8px;padding:16px;font-family:ui-monospace,Consolas,monospace;font-size:.82rem;max-height:420px;overflow:auto}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  footer{border-top:1px solid var(--line);color:var(--muted);font-size:.85rem;padding:18px 20px;max-width:1080px;margin:0 auto}
+  @media print{ header,.btnrow,#controls,footer{display:none} section.card{border:none;padding:0} }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>AITL Evaluator <span aria-hidden="true">·</span> v0.1</h1>
+    <p class="sub">Reference implementation of <strong>Accessibility-in-the-Loop (AITL)</strong> — applying the AI-Generated Interface Accessibility Assurance Framework (AIAAF) to AI-generated user interfaces. <a href="../SPECIFICATION.md">Specification</a> · <a href="../taxonomy/generative-failure-patterns.md">Failure-pattern taxonomy</a></p>
+  </div>
+</header>
+
+<main>
+  <!-- GATE -->
+  <div id="gate" class="pass" role="status" aria-live="polite">
+    <span class="dot" aria-hidden="true"></span>
+    <div><strong id="gateTitle">Release gate: PASSING</strong><br>
+    <span id="gateDetail">No Critical findings recorded yet. The gate fails automatically when a Critical finding is added.</span></div>
+  </div>
+
+  <!-- STEP 1: FRAME -->
+  <section class="card" aria-labelledby="h-frame">
+    <h2 id="h-frame">Step 1 — Frame the evaluation</h2>
+    <div class="grid2">
+      <div>
+        <label for="artifact">Artifact under evaluation</label>
+        <input type="text" id="artifact" placeholder="e.g., Sign-up screen generated by [tool]">
+      </div>
+      <div>
+        <label for="source">Generation source <span class="hintline">(tool / model, if known)</span></label>
+        <input type="text" id="source" placeholder="e.g., public AI design tool output">
+      </div>
+    </div>
+    <label for="task">User task</label>
+    <input type="text" id="task" placeholder="e.g., A new user completes the form and creates an account">
+    <fieldset>
+      <legend>Assistive technologies in scope</legend>
+      <div class="checks">
+        <label><input type="checkbox" class="at" value="Screen reader" checked> Screen reader</label>
+        <label><input type="checkbox" class="at" value="Keyboard-only" checked> Keyboard-only</label>
+        <label><input type="checkbox" class="at" value="Magnification"> Magnification</label>
+        <label><input type="checkbox" class="at" value="Switch access"> Switch access</label>
+      </div>
+    </fieldset>
+    <div class="grid2">
+      <div>
+        <label for="target">Conformance target</label>
+        <select id="target">
+          <option>WCAG 2.2 AA</option><option>WCAG 2.2 AAA</option>
+          <option>WCAG 2.1 AA</option><option>Section 508</option>
+        </select>
+      </div>
+      <div>
+        <label for="evaluator">Evaluator</label>
+        <input type="text" id="evaluator" placeholder="Your name">
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2: FINDINGS -->
+  <section class="card" aria-labelledby="h-find">
+    <h2 id="h-find">Step 2 — Record element-level findings</h2>
+    <form id="findingForm">
+      <div class="grid2">
+        <div>
+          <label for="fElement">Element</label>
+          <input type="text" id="fElement" required placeholder='e.g., "Continue" button'>
+        </div>
+        <div>
+          <label for="fDim">Primary dimension</label>
+          <select id="fDim">
+            <option value="D1">D1 — Perceivable</option><option value="D2">D2 — Operable</option>
+            <option value="D3">D3 — Understandable</option><option value="D4">D4 — Robust</option>
+            <option value="D5">D5 — AT behavior</option><option value="D6">D6 — Generative patterns</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid3">
+        <div>
+          <label for="fWcag">WCAG criterion <span class="hintline">(e.g., 2.1.1)</span></label>
+          <input type="text" id="fWcag" placeholder="e.g., 4.1.2">
+        </div>
+        <div>
+          <label for="fSev">Severity</label>
+          <select id="fSev">
+            <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+          </select>
+        </div>
+        <div>
+          <label for="fPattern">Generative pattern <span class="hintline">(taxonomy)</span></label>
+          <select id="fPattern">
+            <option value="">— none / not applicable —</option>
+            <option value="P1">P1 Placeholder-only labeling</option>
+            <option value="P2">P2 divAsButton</option>
+            <option value="P3">P3 Generic/hallucinated alt text</option>
+            <option value="P4">P4 Visual-only structure</option>
+            <option value="P5">P5 Color-only state</option>
+            <option value="P6">P6 Suppressed focus</option>
+            <option value="P7">P7 Low-contrast default aesthetics</option>
+            <option value="P8">P8 Decorative ARIA misuse</option>
+          </select>
+        </div>
+      </div>
+      <label for="fRationale">Rationale <span class="hintline">(evidence-based: what is wrong and for whom)</span></label>
+      <textarea id="fRationale" required></textarea>
+      <label for="fFix">Recommended fix</label>
+      <textarea id="fFix"></textarea>
+      <div class="btnrow">
+        <button type="submit" class="btn-primary">Add finding</button>
+      </div>
+    </form>
+
+    <div style="margin-top:22px">
+      <table id="findTable" hidden>
+        <caption>Recorded findings</caption>
+        <thead><tr><th>#</th><th>Element</th><th>Dim</th><th>WCAG</th><th>Severity</th><th>Pattern</th><th>Rationale / fix</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty" id="findEmpty">No findings recorded yet.</p>
+    </div>
+  </section>
+
+  <!-- STEP 3: SCORES -->
+  <section class="card" aria-labelledby="h-score">
+    <h2 id="h-score">Step 3 — Score the six dimensions</h2>
+    <p class="hintline" style="margin-top:0">5 conformant · 4 minor issues · 3 degraded · 2 barrier · 1 blocking · 0 not evaluable</p>
+    <div class="dims" id="dims"></div>
+  </section>
+
+  <!-- STEP 4/5: REPORT -->
+  <section class="card" aria-labelledby="h-report" id="controls">
+    <h2 id="h-report">Step 4 — Generate the report</h2>
+    <div class="btnrow">
+      <button class="btn-primary" id="btnReport">Generate report</button>
+      <button class="btn-quiet" id="btnCopy">Copy report</button>
+      <button class="btn-quiet" id="btnPrint">Print / save as PDF</button>
+      <button class="btn-quiet" id="btnExport">Export JSON</button>
+      <label class="btn-quiet" style="display:inline-flex;align-items:center;gap:8px;margin:0">
+        Import JSON <input type="file" id="fileImport" accept=".json" class="visually-hidden">
+      </label>
+      <button class="btn-quiet" id="btnClear">Start new evaluation</button>
+    </div>
+    <p id="saveNote" class="hintline" role="status" aria-live="polite">Work autosaves in this browser.</p>
+    <pre id="report" hidden tabindex="0" aria-label="Generated evaluation report"></pre>
+  </section>
+</main>
+
+<footer>
+  AITL Evaluator v0.1 · Reference implementation of the Accessibility-in-the-Loop methodology · © 2026 Ifeoluwa Orimolade · CC BY 4.0.
+  This tool supports — it does not replace — expert and assistive-technology-user judgment.
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  const DIMS = [
+    ["D1","Perceivable"],["D2","Operable"],["D3","Understandable"],
+    ["D4","Robust"],["D5","AT behavior"],["D6","Generative-pattern resistance"]
+  ];
+  const PATTERNS = {P1:"Placeholder-only labeling",P2:"divAsButton",P3:"Generic/hallucinated alt text",
+    P4:"Visual-only structure",P5:"Color-only state",P6:"Suppressed focus",
+    P7:"Low-contrast default aesthetics",P8:"Decorative ARIA misuse"};
+  let state = { findings: [], scores: {} };
+
+  // --- build dimension score controls
+  const dimsEl = document.getElementById("dims");
+  DIMS.forEach(([id,name])=>{
+    const box=document.createElement("div"); box.className="dim";
+    box.innerHTML =
+      '<label for="score-'+id+'">'+id+' — '+name+'</label>'+
+      '<select id="score-'+id+'" data-dim="'+id+'">'+
+        '<option value="">— not scored —</option>'+
+        [5,4,3,2,1,0].map(n=>'<option value="'+n+'">'+n+'</option>').join("")+
+      '</select><div class="meter"><div id="meter-'+id+'"></div></div>'+
+      '<div class="scoreval" id="sv-'+id+'"></div>';
+    dimsEl.appendChild(box);
+  });
+  dimsEl.addEventListener("change",e=>{
+    if(!e.target.dataset.dim) return;
+    state.scores[e.target.dataset.dim]=e.target.value; paintScores(); save();
+  });
+  function paintScores(){
+    DIMS.forEach(([id])=>{
+      const v=state.scores[id];
+      document.getElementById("meter-"+id).style.width = v===""||v==null ? "0" : (v/5*100)+"%";
+      document.getElementById("sv-"+id).textContent = v===""||v==null ? "" : v+" / 5";
+      const sel=document.getElementById("score-"+id); if(sel.value!==String(v??"")) sel.value=v??"";
+    });
+  }
+
+  // --- findings
+  const form=document.getElementById("findingForm");
+  form.addEventListener("submit",e=>{
+    e.preventDefault();
+    state.findings.push({
+      element:val("fElement"), dim:val("fDim"), wcag:val("fWcag"),
+      sev:val("fSev"), pattern:val("fPattern"),
+      rationale:val("fRationale"), fix:val("fFix")
+    });
+    form.reset(); document.getElementById("fElement").focus();
+    render(); save();
+  });
+  function val(id){return document.getElementById(id).value.trim();}
+
+  function render(){
+    const tb=document.querySelector("#findTable tbody"); tb.innerHTML="";
+    state.findings.forEach((f,i)=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML="<td>"+(i+1)+"</td><td>"+esc(f.element)+"</td><td>"+f.dim+"</td><td>"+esc(f.wcag)+
+        '</td><td class="sev '+f.sev+'">'+f.sev+"</td><td>"+(f.pattern?f.pattern:"—")+
+        "</td><td>"+esc(f.rationale)+(f.fix?"<br><em>Fix:</em> "+esc(f.fix):"")+"</td><td></td>";
+      const del=document.createElement("button");
+      del.className="btn-danger"; del.textContent="Remove";
+      del.setAttribute("aria-label","Remove finding "+(i+1)+": "+f.element);
+      del.addEventListener("click",()=>{state.findings.splice(i,1);render();save();});
+      tr.lastElementChild.appendChild(del);
+      tb.appendChild(tr);
+    });
+    document.getElementById("findTable").hidden = state.findings.length===0;
+    document.getElementById("findEmpty").hidden = state.findings.length!==0;
+    gate();
+  }
+  function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+  // --- release gate (signature element)
+  function gate(){
+    const crits=state.findings.filter(f=>f.sev==="Critical").length;
+    const g=document.getElementById("gate");
+    if(crits>0){
+      g.className="fail";
+      document.getElementById("gateTitle").textContent="Release gate: FAILING";
+      document.getElementById("gateDetail").textContent=
+        crits+" Critical finding"+(crits>1?"s":"")+" — each independently blocks assistive-technology users from completing the task. Resolve before release.";
+    }else{
+      g.className="pass";
+      document.getElementById("gateTitle").textContent="Release gate: PASSING";
+      document.getElementById("gateDetail").textContent=
+        state.findings.length ? "No Critical findings among "+state.findings.length+" recorded." :
+        "No Critical findings recorded yet. The gate fails automatically when a Critical finding is added.";
+    }
+  }
+
+  // --- report
+  document.getElementById("btnReport").addEventListener("click",()=>{
+    const at=[...document.querySelectorAll(".at:checked")].map(c=>c.value).join(", ")||"—";
+    const crits=state.findings.filter(f=>f.sev==="Critical").length;
+    let r="# AITL Evaluation Report\n\n";
+    r+="- Artifact: "+(val("artifact")||"—")+"\n- Generation source: "+(val("source")||"—")+"\n";
+    r+="- Task: "+(val("task")||"—")+"\n- AT in scope: "+at+"\n- Conformance target: "+val("target")+"\n";
+    r+="- Evaluator: "+(val("evaluator")||"—")+"\n- Date: "+new Date().toISOString().slice(0,10)+"\n";
+    r+="- Methodology: AITL v0.1\n\n## Score profile\n\n";
+    DIMS.forEach(([id,name])=>{
+      const v=state.scores[id];
+      r+="- "+id+" "+name+": "+((v===""||v==null)?"not scored":v+"/5")+"\n";
+    });
+    r+="\n## Release gate: "+(crits>0?"FAIL ("+crits+" Critical)":"PASS")+"\n\n## Findings ("+state.findings.length+")\n";
+    state.findings.forEach((f,i)=>{
+      r+="\n"+(i+1)+". ["+f.sev+"] "+f.element+" — "+f.dim+(f.wcag?" · WCAG "+f.wcag:"")+
+         (f.pattern?" · "+f.pattern+" "+PATTERNS[f.pattern]:"")+"\n   Rationale: "+f.rationale+"\n"+
+         (f.fix?"   Fix: "+f.fix+"\n":"");
+    });
+    if(!state.findings.length) r+="\n(none recorded)\n";
+    r+="\n---\nGenerated with the AITL Evaluator v0.1 — Accessibility-in-the-Loop.\nThis report supports, and does not replace, expert and AT-user judgment.\n";
+    const out=document.getElementById("report"); out.textContent=r; out.hidden=false; out.focus();
+  });
+  document.getElementById("btnCopy").addEventListener("click",async()=>{
+    const out=document.getElementById("report");
+    if(out.hidden){document.getElementById("btnReport").click();}
+    try{ await navigator.clipboard.writeText(document.getElementById("report").textContent);
+      note("Report copied to clipboard."); }catch(e){ note("Copy failed — select the text and copy manually."); }
+  });
+  document.getElementById("btnPrint").addEventListener("click",()=>{
+    if(document.getElementById("report").hidden) document.getElementById("btnReport").click();
+    window.print();
+  });
+  function note(msg){document.getElementById("saveNote").textContent=msg;
+    setTimeout(()=>document.getElementById("saveNote").textContent="Work autosaves in this browser.",4000);}
+
+  // --- persistence & transfer
+  const FIELDS=["artifact","source","task","evaluator","target"];
+  function save(){
+    try{
+      const data={fields:{},at:[...document.querySelectorAll(".at:checked")].map(c=>c.value),
+        findings:state.findings,scores:state.scores};
+      FIELDS.forEach(f=>data.fields[f]=val(f));
+      localStorage.setItem("aitl-eval",JSON.stringify(data));
+    }catch(e){}
+  }
+  function load(d){
+    FIELDS.forEach(f=>{if(d.fields&&d.fields[f]!=null)document.getElementById(f).value=d.fields[f];});
+    document.querySelectorAll(".at").forEach(c=>c.checked=(d.at||[]).includes(c.value));
+    state.findings=d.findings||[]; state.scores=d.scores||{};
+    render(); paintScores();
+  }
+  document.querySelectorAll("input,select,textarea").forEach(el=>el.addEventListener("change",save));
+  document.getElementById("btnExport").addEventListener("click",()=>{
+    save();
+    const blob=new Blob([localStorage.getItem("aitl-eval")||"{}"],{type:"application/json"});
+    const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+    a.download="aitl-evaluation.json"; a.click(); URL.revokeObjectURL(a.href);
+  });
+  document.getElementById("fileImport").addEventListener("change",e=>{
+    const file=e.target.files[0]; if(!file)return;
+    const rd=new FileReader();
+    rd.onload=()=>{try{load(JSON.parse(rd.result));save();note("Evaluation imported.");}
+      catch(err){note("Import failed — not a valid AITL JSON file.");}};
+    rd.readAsText(file);
+  });
+  document.getElementById("btnClear").addEventListener("click",()=>{
+    if(!confirm("Start a new evaluation? Unexported work will be cleared."))return;
+    try{localStorage.removeItem("aitl-eval");}catch(e){}
+    location.reload();
+  });
+
+  // boot
+  try{const saved=localStorage.getItem("aitl-eval"); if(saved) load(JSON.parse(saved)); }catch(e){}
+  render(); paintScores();
+})();
+</script>
+</body>
+</html>
