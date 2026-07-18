@@ -57,6 +57,7 @@ Feedback, issues, and discussion are welcome — please open an issue.
 ## Citation
 
 If you reference this work, please cite it (see [`CITATION.cff`](CITATION.cff)).
+DOI: [10.5281/zenodo.21431753](https://doi.org/10.5281/zenodo.21431753)
 
 ## License
 
