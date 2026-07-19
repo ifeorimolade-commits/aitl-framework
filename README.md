@@ -1,4 +1,4 @@
-# Accessibility-in-the-Loop (AITL) Framework
+# Accessibility-in-the-Loop (AITL) 
 
 **An evaluation methodology for the accessibility of AI-generated user interfaces, applying the AI-Generated Interface Accessibility Assurance Framework (AIAAF).**
 
