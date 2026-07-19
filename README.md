@@ -12,7 +12,7 @@ AI systems now generate user interfaces at scale, but accessibility is not a
 measured property of that output. Generative tools optimize for visual
 plausibility; whether a screen-reader user can actually operate the result is
 neither measured nor improved as the interface is produced. Automated checkers
-close only part of the gap — many requirements demand contextual judgment, and
+close only part of the gap, many requirements demand contextual judgment, and
 those tools were built for static, hand-authored pages rather than dynamic,
 AI-generated output.
 
@@ -25,8 +25,8 @@ severity-driven release gate. Concretely, AITL:
    extended with assistive-technology behavior and generative failure patterns);
 2. **Scores** AI output against that rubric at the level of individual
    elements, with evidence-based rationales mapped to WCAG success criteria;
-3. **Returns** the results as actionable signals — prompt/specification
-   guidance, release gates, and routed human review — that design teams and
+3. **Returns** the results as actionable signals,prompt/specification
+   guidance, release gates, and routed human review, that design teams and
    tool-makers can apply before release.
 
 AITL keeps expert and assistive-technology-user judgment central. It does not
