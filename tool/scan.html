@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AITL Scan v0.1 — Automated Pattern Detection</title>
-<meta name="description" content="Automated detection of generative accessibility failure patterns in AI-generated UI markup. Part of the Accessibility-in-the-Loop (AITL) framework.">
+<title>AITL Scan v0.1, Automated Pattern Detection</title>
+<meta name="description" content="Automated detection of generative accessibility failure patterns in AI-generated UI markup. Part of the Accessibility in the Loop (AITL) framework.">
 <style>
   :root{--ink:#16202E;--paper:#FAFBFC;--card:#fff;--line:#D7DDE5;--navy:#1F3864;--navy-deep:#14243A;
     --teal:#0E6E60;--teal-dark:#0A5448;--crit:#B91C1C;--high:#C2410C;--med:#8A6100;--muted:#5B6673;
@@ -52,21 +52,21 @@
 <header>
   <div class="wrap">
     <h1>AITL Scan <span aria-hidden="true">·</span> v0.1</h1>
-    <p class="sub"><strong>Automated detection layer of Accessibility-in-the-Loop (AITL), applying the AIAAF framework.</strong> Paste AI-generated markup; the engine detects the generative failure-pattern taxonomy (P1–P8) and structural defects automatically, fires the release gate, and routes what needs human judgment. Export the result into the AITL Evaluator to complete the human layer.</p>
+    <p class="sub"><strong>Automated detection layer of Accessibility in the Loop (AITL), applying the AIAAF framework.</strong> Paste AI-generated markup; the engine detects the generative failure pattern taxonomy (P1 to P8) and structural defects automatically, fires the release gate, and routes what needs human judgment. Export the result into the AITL Evaluator to complete the human layer.</p>
   </div>
 </header>
 
 <main>
   <section class="card">
-    <h2>Input — AI-generated markup</h2>
-    <label for="src">Manual mode — paste the generated HTML (include its CSS in &lt;style&gt; for style checks)</label>
+    <h2>Input, AI-generated markup</h2>
+    <label for="src">Manual mode, paste the generated HTML (include its CSS in &lt;style&gt; for style checks)</label>
     <textarea id="src" spellcheck="false" placeholder="<div class=&quot;card&quot;> ... </div>"></textarea>
     <label for="url" style="margin-top:12px">Or a prototype / deployed-preview link</label>
     <div style="display:flex;gap:10px;flex-wrap:wrap">
       <input type="url" id="url" placeholder="https://your-prototype.example.com" style="flex:1;min-width:260px;padding:9px 10px;border:1px solid #9AA6B4;border-radius:6px;font:inherit">
       <button class="btn-quiet" id="btnFetch">Fetch &amp; scan link</button>
     </div>
-    <p class="note" id="fetchNote" role="status" aria-live="polite" style="margin:8px 0 0">Note: browsers block cross-site fetches (CORS) for many URLs — if the fetch fails, paste the markup above, or use automatic mode: connect AITL as an MCP server to Claude/your AI tool (see the repository's mcp-server guide), where URL scanning runs without browser limits.</p>
+    <p class="note" id="fetchNote" role="status" aria-live="polite" style="margin:8px 0 0">Note: browsers block cross-site fetches (CORS) for many URLs, if the fetch fails, paste the markup above, or use automatic mode: connect AITL as an MCP server to Claude/your AI tool (see the repository's mcp-server guide), where URL scanning runs without browser limits.</p>
     <div class="btnrow">
       <button class="btn-primary" id="btnScan">Run automated scan</button>
       <button class="btn-quiet" id="btnSample">Load sample (Pulse homepage)</button>
@@ -84,14 +84,14 @@
       <thead><tr><th>#</th><th>Element</th><th>Pattern</th><th>WCAG</th><th>Severity</th><th>Detection rationale</th></tr></thead>
       <tbody></tbody>
     </table>
-    <p class="note" id="cleanNote" hidden>No automatically detectable defects found — proceed to the human evaluation layer.</p>
+    <p class="note" id="cleanNote" hidden>No automatically detectable defects found, proceed to the human evaluation layer.</p>
 
     <div style="margin-top:18px" class="routed" id="routedBox">
       <h3>Routed to human / AT-user review (not automatable)</h3>
       <ul id="routedList"></ul>
     </div>
 
-    <h2 style="margin-top:22px">Suggested dimension scores <span class="note">(starting point — the human evaluator confirms)</span></h2>
+    <h2 style="margin-top:22px">Suggested dimension scores <span class="note">(starting point, the human evaluator confirms)</span></h2>
     <div class="scores" id="scores"></div>
 
     <div class="btnrow">
@@ -102,13 +102,13 @@
   </section>
 </main>
 
-<footer>AITL Scan v0.1 · Automated layer of the Accessibility-in-the-Loop framework · © 2026 Ifeoluwa Orimolade · CC BY 4.0. Automated detection covers the machine-detectable layer only; contextual judgments are routed to humans by design.</footer>
+<footer>AITL Scan v0.1 · Automated layer of the Accessibility in the Loop framework · © 2026 Ifeoluwa Orimolade · CC BY 4.0. Automated detection covers the machine detectable layer only; contextual judgments are routed to humans by design.</footer>
 
 <script>
 (function(){
 "use strict";
-const PATTERNS={P1:"Placeholder-only labeling",P2:"divAsButton",P3:"Generic/hallucinated alt text",
-  P4:"Visual-only structure",P5:"Color-only state",P6:"Suppressed focus",
+const PATTERNS={P1:"Placeholder only labeling",P2:"divAsButton",P3:"Generic/hallucinated alt text",
+  P4:"Visual only structure",P5:"Color only state",P6:"Suppressed focus",
   P7:"Low-contrast default aesthetics",P8:"Decorative ARIA misuse"};
 const GENERIC_ALT=["image","img","photo","picture","icon","illustration","graphic","logo image","banner"];
 let findings=[], routed=[], scores={};
@@ -141,17 +141,17 @@ function scan(html){
   const css=[...doc.querySelectorAll("style")].map(s=>s.textContent).join("\n");
   const isFrag=!/<html[\s>]/i.test(html);
 
-  // P1 — placeholder-only inputs
+  // P1, placeholder only inputs
   doc.querySelectorAll("input[placeholder],textarea[placeholder]").forEach(el=>{
     const id=el.id;
     const hasLabel=(id&&doc.querySelector('label[for="'+CSS.escape(id)+'"]'))||el.closest("label")||
       el.getAttribute("aria-label")||el.getAttribute("aria-labelledby")||el.getAttribute("title");
     if(!hasLabel) add(el,"P1","1.3.1, 3.3.2","Critical","D3",
-      "Input identified only by placeholder text, which is not a programmatic label and disappears on entry \u2014 unnamed for screen-reader users.",
+      "Input identified only by placeholder text, which is not a programmatic label and disappears on entry \u2014 unnamed for screen reader users.",
       "Add a persistent associated <label> or aria-label.");
   });
 
-  // P2 — non-semantic click handlers
+  // P2, non-semantic click handlers
   doc.querySelectorAll("[onclick]").forEach(el=>{
     const tag=el.tagName.toLowerCase();
     if(["a","button","input","select","textarea","summary","label"].includes(tag))return;
@@ -162,7 +162,7 @@ function scan(html){
         "Use a native <button>, or add role=\"button\", tabindex=\"0\", and key handling.");
   });
 
-  // P3 — missing/generic alt
+  // P3, missing/generic alt
   doc.querySelectorAll("img").forEach(el=>{
     if(!el.hasAttribute("alt")){
       add(el,"P3","1.1.1","High","D1","Image has no alt attribute at all \u2014 screen readers may announce the filename.","Add alt=\"\" if decorative, or a purposeful description.");
@@ -176,25 +176,25 @@ function scan(html){
     }
   });
 
-  // P4 — heading structure
+  // P4, heading structure
   const heads=doc.querySelectorAll("h1,h2,h3,h4,h5,h6");
   if(doc.body&&doc.body.textContent.trim().length>120){
     if(heads.length===0)
       add("(document)","P4","1.3.1, 2.4.6","High","D1",
-        "No heading elements exist anywhere \u2014 titles are styled containers only; screen-reader heading navigation returns an empty list.",
+        "No heading elements exist anywhere \u2014 titles are styled containers only; screen reader heading navigation returns an empty list.",
         "Real <h1>\u2013<h3> hierarchy for the title and sections.");
     else if(!doc.querySelector("h1"))
       add("(document)","P4","1.3.1, 2.4.6","Medium","D1",
         "Headings exist but no <h1> \u2014 the page lacks a programmatic title.","Promote the main title to <h1>.");
   }
 
-  // P6 — suppressed focus
+  // P6, suppressed focus
   if(/outline\s*:\s*(none|0)/i.test(css) && !/:focus-visible/i.test(css))
     add("(stylesheet)","P6","2.4.7","High","D2",
       "CSS removes focus outlines (outline:none/0) with no :focus-visible replacement \u2014 keyboard users cannot see where they are.",
       "Remove the reset or add a visible :focus-visible style.");
 
-  // P8 — aria-hidden over focusable
+  // P8, aria-hidden over focusable
   doc.querySelectorAll('[aria-hidden="true"]').forEach(el=>{
     const f=el.querySelector('a[href],button,input,select,textarea,[tabindex]:not([tabindex="-1"])');
     if(f) add(el,"P8","4.1.2","High","D4",
@@ -202,7 +202,7 @@ function scan(html){
       "Remove aria-hidden from the container; hide only decorative children.");
   });
 
-  // P7 — low-contrast colors in CSS (vs white; heuristic)
+  // P7, low-contrast colors in CSS (vs white; heuristic)
   const seen=new Set();
   (css.match(/color\s*:\s*([^;{}]+)/gi)||[]).forEach(decl=>{
     const v=decl.split(":")[1]; const c=parseColor(v||"");
@@ -214,11 +214,11 @@ function scan(html){
         "Darken to \u22654.5:1, e.g. #4B5563 or darker on white.");
   });
 
-  // P5 — color-only state heuristic → routed unless aria-current present
+  // P5, color only state heuristic → routed unless aria-current present
   doc.querySelectorAll('a.active,a.selected,a.current,[class*="active"] a').forEach(el=>{
     if(el.tagName==="A"&&!el.getAttribute("aria-current"))
       add(el,"P5","1.4.1","Medium","D1",
-        "Element styled as the active/current item without aria-current \u2014 if the distinction is color-only, non-color users receive no cue.",
+        "Element styled as the active/current item without aria-current \u2014 if the distinction is color only, non-color users receive no cue.",
         "Add aria-current=\"page\" and a non-color cue (underline/weight).");
   });
 
@@ -235,7 +235,7 @@ function scan(html){
   }
 
   // always-routed judgments (the non-automatable layer, by design)
-  routed.push("Screen-reader pass (D5): are elements announced sensibly and is the task completable?");
+  routed.push("Screen reader pass (D5): are elements announced sensibly and is the task completable?");
   routed.push("Keyboard pass (D5): reachability, visible focus in practice, logical order.");
   routed.push("Reading order and label comprehension in context (D3).");
   routed.push("Touch/click target sizes \u2265 24\u00D724 px measured as rendered (2.5.8).");
@@ -293,12 +293,12 @@ $("btnReport").addEventListener("click",()=>{
   r+="\n## Routed to human / AT-user review\n"; routed.forEach(x=>r+="- "+x+"\n");
   r+="\n## Suggested scores\n";
   Object.entries(scores).forEach(([d,v])=>r+="- "+d+": "+(v==null?"requires human evaluation":v+"/5 (suggested)")+"\n");
-  r+="\n---\nAITL Scan automates the machine-detectable layer of the AITL methodology.\nContextual judgments are routed to human and assistive-technology-user review by design.\n";
+  r+="\n---\nAITL Scan automates the machine detectable layer of AITL.\nContextual judgments are routed to human and assistive-technology-user review by design.\n";
   $("report").textContent=r; $("report").hidden=false; $("report").focus();
 });
 $("btnJson").addEventListener("click",()=>{
   const data={fields:{artifact:"(scanned artifact)",source:"AITL Scan v0.1 automated pass",
-    task:"",evaluator:"",target:"WCAG 2.2 AA"},at:["Screen reader","Keyboard-only"],
+    task:"",evaluator:"",target:"WCAG 2.2 AA"},at:["Screen reader","Keyboard only"],
     findings:findings.map(f=>({element:f.element,dim:f.dim,wcag:f.wcag,sev:f.sev,pattern:f.pattern,rationale:f.rationale,fix:f.fix})),
     scores:Object.fromEntries(Object.entries(scores).map(([k,v])=>[k,v==null?"":String(v)]))};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
@@ -327,5 +327,6 @@ $("src").value=
 });
 })();
 </script>
+<script>if(window.self!==window.top){document.documentElement.classList.add("embedded");var st=document.createElement("style");st.textContent=".embedded header,.embedded footer{display:none}.embedded main{padding-top:8px}";document.head.appendChild(st);}</script>
 </body>
 </html>

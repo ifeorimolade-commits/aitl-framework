@@ -1,4 +1,4 @@
-# Generative Accessibility Failure Patterns — Taxonomy v0.1
+# Generative Accessibility Failure Patterns, Taxonomy v0.1
 
 Part of the AI-Generated Interface Accessibility Assurance Framework (AIAAF).
 The defect classes that AI systems characteristically produce when generating
@@ -9,7 +9,7 @@ are welcome via issues.
 
 ---
 
-## P1 — Placeholder-only labeling
+## P1, Placeholder only labeling
 
 - **Pattern:** form fields convey their purpose only through `placeholder`
   text; no persistent, programmatically associated label exists.
@@ -21,7 +21,7 @@ are welcome via issues.
   as a supplementary example.
 - **Maps to:** WCAG 1.3.1, 3.3.2.
 
-## P2 — divAsButton
+## P2, divAsButton
 
 - **Pattern:** non-semantic containers (`<div>`, `<span>`) with click
   handlers standing in for real controls.
@@ -33,7 +33,7 @@ are welcome via issues.
   keyboard operability, role, and focusability.
 - **Maps to:** WCAG 2.1.1, 4.1.2.
 
-## P3 — Generic or hallucinated alternative text
+## P3, Generic or hallucinated alternative text
 
 - **Pattern:** `alt` values produced because the attribute exists ("image",
   "illustration"), or confidently describing content the image does not
@@ -46,9 +46,9 @@ are welcome via issues.
   descriptions for informative ones.
 - **Maps to:** WCAG 1.1.1.
 
-## P4 — Visual-only structure
+## P4, Visual only structure
 
-- **Pattern:** hierarchy implied by styling but absent from markup — styled
+- **Pattern:** hierarchy implied by styling but absent from markup, styled
   paragraphs instead of headings, spacing instead of lists or landmarks.
 - **Why:** the visual outcome is achievable entirely in CSS; structural
   semantics are invisible in a screenshot.
@@ -58,7 +58,7 @@ are welcome via issues.
   landmarks.
 - **Maps to:** WCAG 1.3.1, 2.4.6.
 
-## P5 — Color-only state
+## P5, Color only state
 
 - **Pattern:** errors, selection, or status conveyed by color alone (e.g., a
   red border) with no text equivalent.
@@ -70,7 +70,7 @@ are welcome via issues.
   associated to the affected element.
 - **Maps to:** WCAG 1.4.1, 3.3.1.
 
-## P6 — Suppressed focus
+## P6, Suppressed focus
 
 - **Pattern:** `outline: none` (or equivalent) removes the visible focus
   indicator with no replacement.
@@ -80,7 +80,7 @@ are welcome via issues.
 - **Remediation:** visible focus style on all interactive elements.
 - **Maps to:** WCAG 2.4.7.
 
-## P7 — Low-contrast default aesthetics
+## P7, Low-contrast default aesthetics
 
 - **Pattern:** light-gray secondary text (hints, placeholders, captions)
   below contrast minimums.
@@ -91,10 +91,10 @@ are welcome via issues.
 - **Remediation:** meet 4.5:1 (normal) / 3:1 (large text, UI components).
 - **Maps to:** WCAG 1.4.3, 1.4.11.
 
-## P8 — Decorative ARIA misuse
+## P8, Decorative ARIA misuse
 
 - **Pattern:** ARIA applied in ways that hide or misrepresent interactive
-  content — e.g., `aria-hidden="true"` on containers with focusable
+  content, e.g., `aria-hidden="true"` on containers with focusable
   descendants, or decorative roles on functional elements.
 - **Why:** ARIA attributes are generated as boilerplate without modeling
   their effect on the accessibility tree.
@@ -106,6 +106,6 @@ are welcome via issues.
 
 ---
 
-*v0.1 — July 2026. Initial eight patterns, drawn from recurring defects
+*v0.1, July 2026. Initial eight patterns, drawn from recurring defects
 observed in AI-generated interface output and demonstrated in the companion
 worked example.*

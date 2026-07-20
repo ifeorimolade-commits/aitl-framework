@@ -1,7 +1,7 @@
 # AITL MCP Server (v0.1)
 
-Connects the AITL automated accessibility scan — applying the AI-Generated Interface Accessibility Assurance Framework (AIAAF) — to AI assistants via the
-**Model Context Protocol (MCP)** — the open standard that lets AI models call
+Connects the AITL automated accessibility scan, applying the AI-Generated Interface Accessibility Assurance Framework (AIAAF), to AI assistants via the
+**Model Context Protocol (MCP)**, the open standard that lets AI models call
 external tools. With this server connected, an assistant that generates UI can
 **scan its own output for accessibility in the loop**: generate → scan →
 apply fixes → re-scan until the release gate passes.
@@ -10,9 +10,9 @@ apply fixes → re-scan until the release gate passes.
 
 | Tool | What it does |
 |---|---|
-| `aitl_scan_html` | Scans generated HTML/CSS: taxonomy patterns (P1–P8), structural defects, WCAG mappings, fixes, release gate, suggested scores, routed human-review items |
+| `aitl_scan_html` | Scans generated HTML/CSS: taxonomy patterns (P1 to P8), structural defects, WCAG mappings, fixes, release gate, suggested scores, routed human-review items |
 | `aitl_scan_url` | Fetches a publicly reachable prototype/page URL and scans it |
-| `aitl_taxonomy` | Returns the failure-pattern taxonomy + generation-time guidance (use *before* generating) |
+| `aitl_taxonomy` | Returns the failure pattern taxonomy + generation time guidance (use *before* generating) |
 
 ## Setup
 
@@ -54,9 +54,9 @@ configuration pattern above.
 3. Assistant calls `aitl_scan_html` on its own output.
 4. Gate FAIL → apply the returned fixes → re-scan.
 5. Gate PASS (automated layer) → route the returned human-review items to a
-   person — screen-reader behavior, alt-text meaningfulness, rendered
+   person, screen reader behavior, alt-text meaningfulness, rendered
    contrast. **The automated layer never replaces human and
-   assistive-technology-user judgment; it clears the machine-detectable layer
+   assistive-technology-user judgment; it clears the machine detectable layer
    so human review is spent where it matters.**
 
 ## Example prompt (Claude with AITL connected)
@@ -65,5 +65,5 @@ configuration pattern above.
 > your output and fix everything it finds until the gate passes; then list the
 > items it routed to human review.
 
-Part of the [Accessibility-in-the-Loop (AITL) Framework](../README.md).
+Part of the [Accessibility in the Loop (AITL) Framework](../README.md).
 © 2026 Ifeoluwa Orimolade · CC BY 4.0
