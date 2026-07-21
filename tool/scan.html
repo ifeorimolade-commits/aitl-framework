@@ -59,17 +59,34 @@
 <main>
   <section class="card">
     <h2>Input, AI-generated markup</h2>
-    <label for="src">Manual mode, paste the generated HTML (include its CSS in &lt;style&gt; for style checks)</label>
-    <textarea id="src" spellcheck="false" placeholder="<div class=&quot;card&quot;> ... </div>"></textarea>
-    <label for="url" style="margin-top:12px">Or a prototype / deployed-preview link</label>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <input type="url" id="url" placeholder="https://your-prototype.example.com" style="flex:1;min-width:260px;padding:9px 10px;border:1px solid #9AA6B4;border-radius:6px;font:inherit">
-      <button class="btn-quiet" id="btnFetch">Fetch &amp; scan link</button>
-    </div>
-    <p class="note" id="fetchNote" role="status" aria-live="polite" style="margin:8px 0 0">Note: browsers block cross-site fetches (CORS) for many URLs, if the fetch fails, paste the markup above, or use automatic mode: connect AITL as an MCP server to Claude/your AI tool (see the repository's mcp-server guide), where URL scanning runs without browser limits.</p>
+    <label for="src">Paste the page's HTML code here</label>
+    <details style="margin:0 0 8px">
+      <summary style="cursor:pointer;color:var(--teal);font-size:.9rem;font-weight:600">New here? How to get a page's HTML code (30 seconds)</summary>
+      <div style="background:#F1F5F9;border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin-top:8px;font-size:.9rem;line-height:1.5">
+        <strong>The easiest way to try this tool:</strong> click the <em>Load sample</em> button below. It fills in a real example so you can see a scan run immediately.<br><br>
+        <strong>To check your own page:</strong>
+        <ol style="margin:6px 0 0 18px;padding:0">
+          <li>Open the page you want to check in your browser.</li>
+          <li>Right-click anywhere on the page and choose <em>View Page Source</em> (or press <em>Ctrl+U</em> on Windows, <em>Cmd+Option+U</em> on Mac).</li>
+          <li>Select all of it (<em>Ctrl+A</em> / <em>Cmd+A</em>), copy it, and paste it into the box below.</li>
+        </ol>
+        <div style="margin-top:8px">Working in an AI design tool? Copy the generated HTML straight from there and paste it in.</div>
+      </div>
+    </details>
+    <textarea id="src" spellcheck="false" placeholder="Paste HTML here, or click Load sample below to try it instantly."></textarea>
+    <details style="margin:10px 0 0">
+      <summary style="cursor:pointer;color:#5B6673;font-size:.85rem">Have a live link instead of code? (advanced)</summary>
+      <div style="margin-top:8px">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input type="url" id="url" placeholder="https://your-page.example.com" style="flex:1;min-width:260px;padding:9px 10px;border:1px solid #9AA6B4;border-radius:6px;font:inherit">
+          <button class="btn-quiet" id="btnFetch">Try to fetch link</button>
+        </div>
+        <p class="note" id="fetchNote" role="status" aria-live="polite" style="margin:8px 0 0">Browsers block most links for security, so this often will not work. If it does not, just paste the page's HTML in the box above instead (see the how-to). For scanning live links reliably, connect AITL to your AI assistant as an MCP server.</p>
+      </div>
+    </details>
     <div class="btnrow">
       <button class="btn-primary" id="btnScan">Run automated scan</button>
-      <button class="btn-quiet" id="btnSample">Load sample (Pulse homepage)</button>
+      <button class="btn-quiet" id="btnSample">Load sample to try it &rarr;</button>
     </div>
   </section>
 
@@ -316,7 +333,7 @@ $("btnFetch").addEventListener("click",async()=>{
     const html=await res.text(); $("src").value=html; scan(html);
     $("fetchNote").textContent="Fetched and scanned: "+u;
   }catch(e){
-    $("fetchNote").textContent="Could not fetch that URL from the browser (likely CORS). Paste the markup above, or use automatic mode via the MCP server, which fetches URLs without browser limits.";
+    $("fetchNote").textContent="That link could not be fetched (most links are blocked by the browser for security). No problem, just paste the page\u2019s HTML into the box above instead. Open the how-to above the box if you are not sure how.";
   }
 });
 
