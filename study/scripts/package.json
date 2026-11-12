@@ -1,0 +1,21 @@
+{
+  "name": "aitl-corpus-study-1",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scripts for AITL Corpus Study 1: automated audit, Lighthouse, MCP smoke test.",
+  "type": "module",
+  "scripts": {
+    "audit": "node audit.mjs",
+    "lighthouse": "node lighthouse.mjs",
+    "smoke": "node mcp_smoke_test.mjs",
+    "summarize": "python3 summarize.py"
+  },
+  "dependencies": {
+    "axe-core": "4.10.3",
+    "chrome-launcher": "1.2.2",
+    "lighthouse": "12.6.1",
+    "playwright": "1.63.0"
+  },
+  "author": "Ifeoluwa Orimolade",
+  "license": "CC-BY-4.0"
+}

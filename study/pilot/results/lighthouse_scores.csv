@@ -1,0 +1,2 @@
+interface_id,lighthouse_version,a11y_score,failed_audits,manual_checks_listed
+PILOT-00,12.6.1,86,aria-hidden-focus color-contrast,10
