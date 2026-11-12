@@ -1,0 +1,10 @@
+interface_id,tool,model_version,plan,component,condition,prompt_file,chat_link_or_id,generated_at,memory_and_custom_instructions_off,followup_used,output_capture,source_path,url,notes
+C1-CL-A,Claude,,,Patient portal sign up form,A,prompts/C1.txt,,,,,copy code from the response,corpus/source/C1-CL-A.html,,
+C1-GP-A,ChatGPT,,,Patient portal sign up form,A,prompts/C1.txt,,,,,copy code from the response,corpus/source/C1-GP-A.html,,
+C1-FM-A,Figma Make,,,Patient portal sign up form,A,prompts/C1_figma_make.txt,,,,,"publish preview URL, then audit.mjs saves rendered DOM",corpus/source/C1-FM-A.html,,
+C2-CL-A,Claude,,,City services homepage,A,prompts/C2.txt,,,,,copy code from the response,corpus/source/C2-CL-A.html,,
+C2-GP-A,ChatGPT,,,City services homepage,A,prompts/C2.txt,,,,,copy code from the response,corpus/source/C2-GP-A.html,,
+C2-FM-A,Figma Make,,,City services homepage,A,prompts/C2_figma_make.txt,,,,,"publish preview URL, then audit.mjs saves rendered DOM",corpus/source/C2-FM-A.html,,
+C3-CL-A,Claude,,,Appointment booking dialog,A,prompts/C3.txt,,,,,copy code from the response,corpus/source/C3-CL-A.html,,
+C3-GP-A,ChatGPT,,,Appointment booking dialog,A,prompts/C3.txt,,,,,copy code from the response,corpus/source/C3-GP-A.html,,
+C3-FM-A,Figma Make,,,Appointment booking dialog,A,prompts/C3_figma_make.txt,,,,,"publish preview URL, then audit.mjs saves rendered DOM",corpus/source/C3-FM-A.html,,

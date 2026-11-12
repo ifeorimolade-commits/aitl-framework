@@ -1,0 +1,2 @@
+interface_id,axe_version,axe_violation_rules,axe_violation_nodes,axe_rules,aitl_source_gate,aitl_source_patterns,aitl_rendered_gate,aitl_rendered_patterns,tab_stops,tab_stops_no_visible_indicator,non_native_click_targets,page_errors
+PILOT-00,4.10.3,5,16,aria-hidden-focus color-contrast landmark-one-main page-has-heading-one region,FAIL,P1 P2 P3 P4 P5 P6 P7 P8,FAIL,P1 P2 P3 P4 P5 P6 P7 P8,10,10,1,0

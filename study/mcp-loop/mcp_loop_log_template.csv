@@ -1,0 +1,4 @@
+interface_id,client,model_version,started_at,scan_calls,first_gate,first_automated_patterns,final_gate,final_automated_patterns,routed_items_listed,scanner_evasions,recording_file,notes
+C1-CL-M,Claude Desktop,,,,,,,,,,,
+C2-CL-M,Claude Desktop,,,,,,,,,,,
+C3-CL-M,Claude Desktop,,,,,,,,,,,
