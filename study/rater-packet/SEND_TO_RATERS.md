@@ -2,7 +2,7 @@
 
 ## Who to ask
 
-Two people with professional accessibility or UX evaluation experience who did not help build AIAAF. People who are co-authors with you, or who drafted any part of the petition, are not the strongest choice, because their independence will be questioned. Someone who works in accessibility at a company or institution you have no reporting relationship with is ideal. If one of them later writes a letter, it can describe their own hands on use of the framework, which is the kind of evidence the RFE says is missing.
+Two people with professional accessibility or UX evaluation experience who did not help build AIAAF. Co-authors and close collaborators are not the strongest choice, because their independence will be questioned. Someone who works in accessibility at a company or institution you have no reporting relationship with is ideal.
 
 ## What to send
 
@@ -27,9 +27,9 @@ After Step 3 of the runbook (raw corpus committed):
 >
 > It would take about 90 minutes: a keyboard pass and a screen reader pass on each interface, then filling in a short sheet. There are also six short feedback questions, and honest criticism is the most useful answer. Everything is in the attached packet, and the instructions explain how to do it.
 >
-> Your sheets would be published as part of the open study data, under your name only if you agree. I should also tell you that I may cite the study in my academic work and in my own immigration filings, so you can decide with that in mind.
+> Your sheets would be published as part of the open study data, under your name only if you agree. I should also tell you how I may use the study beyond publishing it, so you can decide with that in mind: [author to fill in before sending].
 >
-> If you can do it, could you send the sheets back by Sunday, November 15? If you can't, no problem at all, and thank you for reading.
+> If you can do it, could you send the sheets back by [date]? If you can't, no problem at all, and thank you for reading.
 >
 > Thanks,
 > Ife
