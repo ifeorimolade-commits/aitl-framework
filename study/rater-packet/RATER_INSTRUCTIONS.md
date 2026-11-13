@@ -35,4 +35,4 @@ Email the three CSV files back, with answers to these questions in the body of t
 5. Would you use this framework, or the AITL tool that applies it, in your own work? Under what conditions?
 6. May your name, role and organization be listed in the published study as an independent evaluator? (Yes, or no and use an anonymous label.) May your answers to these questions be quoted with your name?
 
-Your evaluation and answers will be published as part of the open study data, under your name only if you agree in question 6. The study results may also be cited by the author in academic work and in his own professional and immigration filings. Your participation is voluntary and you can withdraw your data before publication by telling the author.
+Your evaluation and answers will be published as part of the open study data, under your name only if you agree in question 6. The study results may also be cited by the author in academic work and in [author to state any other use before sending]. Your participation is voluntary and you can withdraw your data before publication by telling the author.
